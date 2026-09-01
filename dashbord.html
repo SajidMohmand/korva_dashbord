@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Korva Admin — Professionals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAFAF8;
+    --surface:#FFFFFF;
+    --mint:#F0FDF4;
+    --ink:#111827;
+    --muted:#6B7280;
+    --faint:#9CA3AF;
+    --border:#E5E7EB;
+    --border-light:#F0F1F3;
+    --primary:#15803D;
+    --primary-bright:#22C55E;
+    --primary-bg:#ECFDF5;
+    --amber:#B45309;
+    --amber-bg:#FFFBEB;
+    --slate-bg:#F3F4F6;
+    --danger:#B91C1C;
+    --danger-bg:#FEF2F2;
+    --radius-lg:22px;
+    --radius-md:14px;
+    --radius-sm:9px;
+    --shadow:0 1px 2px rgba(17,24,39,.04), 0 10px 28px -14px rgba(17,24,39,.14);
+    font-family:'Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+  body{-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.num{font-family:'Manrope',sans-serif;}
+  button{font-family:inherit;}
+  input,select{font-family:inherit;}
+
+  /* ---------- Auth screen ---------- */
+  #auth-screen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .auth-card{
+    width:100%;
+    max-width:380px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    padding:36px 32px;
+  }
+  .brand-mark{
+    width:44px;height:44px;border-radius:14px;
+    background:linear-gradient(155deg,var(--primary-bright),var(--primary));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;font-size:20px;margin-bottom:18px;
+  }
+  .auth-card h1{font-size:22px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em;}
+  .auth-card p.sub{margin:0 0 24px;color:var(--muted);font-size:14px;line-height:1.5;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+  .field input{
+    width:100%;padding:11px 14px;border-radius:var(--radius-sm);
+    border:1.5px solid var(--border);font-size:14px;background:#fff;color:var(--ink);
+    transition:border-color .15s;
+  }
+  .field input:focus{outline:none;border-color:var(--primary-bright);}
+  .auth-btn{
+    width:100%;padding:12px 14px;border:none;border-radius:var(--radius-sm);
+    background:var(--primary);color:#fff;font-weight:700;font-size:14.5px;
+    cursor:pointer;margin-top:6px;transition:background .15s, opacity .15s;
+  }
+  .auth-btn:hover{background:var(--primary-bright);}
+  .auth-btn:disabled{opacity:.55;cursor:not-allowed;}
+  .auth-error{
+    background:var(--danger-bg);color:var(--danger);font-size:13px;
+    padding:10px 12px;border-radius:var(--radius-sm);margin-top:14px;line-height:1.4;
+    display:none;
+  }
+  .auth-note{font-size:12px;color:var(--faint);margin-top:20px;line-height:1.5;}
+
+  /* ---------- App shell ---------- */
+  #app{min-height:100vh;}
+  header.topbar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(250,250,248,.9);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+    padding:14px 28px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .brand-mark{width:32px;height:32px;border-radius:10px;font-size:14px;margin:0;}
+  .brand .wordmark{font-weight:800;font-size:16.5px;letter-spacing:-.01em;}
+  .brand .tag{
+    font-size:11px;font-weight:700;color:var(--primary);
+    background:var(--primary-bg);padding:3px 8px;border-radius:20px;
+  }
+  .topbar-right{display:flex;align-items:center;gap:14px;}
+  .admin-email{font-size:13px;color:var(--muted);}
+  .signout-btn{
+    background:none;border:1.5px solid var(--border);color:var(--ink);
+    font-size:13px;font-weight:600;padding:7px 13px;border-radius:20px;cursor:pointer;
+    transition:border-color .15s,background .15s;
+  }
+  .signout-btn:hover{border-color:var(--faint);background:#fff;}
+
+  main{max-width:980px;margin:0 auto;padding:28px 28px 80px;}
+
+  .stats-row{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;
+  }
+  .stat-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:16px 18px;
+  }
+  .stat-card .num{font-size:26px;font-weight:800;line-height:1.1;}
+  .stat-card .label{font-size:12.5px;color:var(--muted);margin-top:4px;}
+
+  .toolbar{
+    display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;
+  }
+  .search-wrap{
+    flex:1;min-width:220px;position:relative;
+  }
+  .search-wrap svg{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    width:15px;height:15px;color:var(--faint);
+  }
+  .search-wrap input{
+    width:100%;padding:10px 14px 10px 36px;border-radius:20px;
+    border:1.5px solid var(--border);background:#fff;font-size:14px;color:var(--ink);
+  }
+  .search-wrap input:focus{outline:none;border-color:var(--primary-bright);}
+  select.filter{
+    padding:10px 14px;border-radius:20px;border:1.5px solid var(--border);
+    background:#fff;font-size:13.5px;color:var(--ink);cursor:pointer;
+  }
+
+  #status-line{font-size:13px;color:var(--faint);margin-bottom:14px;min-height:16px;}
+
+  .pro-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:20px 22px;margin-bottom:14px;box-shadow:var(--shadow);
+  }
+  .pro-head{display:flex;gap:14px;align-items:flex-start;}
+  .avatar{
+    width:46px;height:46px;border-radius:14px;flex:none;
+    background:var(--mint);color:var(--primary);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:16px;overflow:hidden;
+  }
+  .avatar img{width:100%;height:100%;object-fit:cover;}
+  .pro-info{flex:1;min-width:0;}
+  .pro-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .pro-name{font-weight:700;font-size:15.5px;}
+  .pill{
+    font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
+    white-space:nowrap;
+  }
+  .pill.live{background:var(--primary-bg);color:var(--primary);}
+  .pill.pending{background:var(--amber-bg);color:var(--amber);}
+  .pill.online{background:var(--primary-bg);color:var(--primary);}
+  .pill.offline{background:var(--slate-bg);color:var(--muted);}
+  .pro-contact{font-size:13px;color:var(--muted);margin-top:3px;}
+  .pro-meta{font-size:12.5px;color:var(--faint);margin-top:2px;}
+
+  .services-block{margin-top:16px;padding-top:14px;border-top:1px solid var(--border-light);}
+  .services-title{font-size:12px;font-weight:700;color:var(--faint);text-transform:none;margin-bottom:10px;}
+  .service-row{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 0;border-bottom:1px solid var(--border-light);
+  }
+  .service-row:last-child{border-bottom:none;}
+  .service-emoji{
+    width:34px;height:34px;border-radius:10px;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;
+  }
+  .service-main{flex:1;min-width:0;}
+  .service-title{font-weight:600;font-size:14px;}
+  .service-sub{font-size:12.5px;color:var(--muted);margin-top:1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:420px;}
+  .service-date{font-size:11.5px;color:var(--faint);white-space:nowrap;}
+
+  .toggle-wrap{display:flex;align-items:center;gap:8px;flex:none;}
+  .toggle-label{font-size:12px;font-weight:700;width:52px;text-align:right;}
+  .toggle-label.on{color:var(--primary);}
+  .toggle-label.off{color:var(--faint);}
+  .toggle{
+    width:38px;height:22px;border-radius:20px;border:none;cursor:pointer;
+    background:var(--border);position:relative;transition:background .18s;flex:none;
+    padding:0;
+  }
+  .toggle::after{
+    content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;
+    border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);
+    transition:transform .18s;
+  }
+  .toggle.active{background:var(--primary-bright);}
+  .toggle.active::after{transform:translateX(16px);}
+  .toggle:disabled{opacity:.5;cursor:wait;}
+
+  .no-services{font-size:13px;color:var(--faint);padding:6px 0;}
+  .empty-state{
+    text-align:center;padding:60px 20px;color:var(--muted);
+  }
+  .empty-state .emoji{font-size:34px;margin-bottom:10px;}
+  .empty-state h3{font-size:16px;margin:0 0 4px;}
+  .empty-state p{font-size:13.5px;margin:0;color:var(--faint);}
+
+  .toast{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;font-size:13px;padding:10px 16px;
+    border-radius:20px;box-shadow:var(--shadow);opacity:0;pointer-events:none;
+    transition:opacity .2s, transform .2s;z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+  .toast.error{background:var(--danger);}
+
+  [hidden]{display:none !important;}
+
+  @media (max-width:640px){
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    header.topbar{padding:12px 16px;}
+    main{padding:20px 16px 60px;}
+    .service-sub{max-width:170px;}
+    .admin-email{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH SCREEN ============ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="brand-mark">K</div>
+    <h1>Korva Admin</h1>
+    <p class="sub">Sign in with your admin account to manage professionals and their services.</p>
+    <form id="auth-form">
+      <div class="field">
+        <label for="auth-email">Email</label>
+        <input id="auth-email" type="email" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label for="auth-password">Password</label>
+        <input id="auth-password" type="password" autocomplete="current-password" required />
+      </div>
+      <button class="auth-btn" id="auth-submit" type="submit">Sign in</button>
+      <div class="auth-error" id="auth-error"></div>
+    </form>
+    <p class="auth-note">Access is limited to accounts listed in the <code>admins</code> collection in Firestore. Ask a teammate to add your account if you can't sign in.</p>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">K</div>
+      <span class="wordmark">Korva</span>
+      <span class="tag">Admin</span>
+    </div>
+    <div class="topbar-right">
+      <span class="admin-email" id="admin-email"></span>
+      <button class="signout-btn" id="signout-btn">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="stats-row">
+      <div class="stat-card"><div class="num" id="stat-pros">0</div><div class="label">Professionals</div></div>
+      <div class="stat-card"><div class="num" id="stat-live">0</div><div class="label">Setup complete</div></div>
+      <div class="stat-card"><div class="num" id="stat-services">0</div><div class="label">Total services</div></div>
+      <div class="stat-card"><div class="num" id="stat-active">0</div><div class="label">Active services</div></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="search-input" type="text" placeholder="Search by name, phone, or service…" />
+      </div>
+      <select class="filter" id="category-filter">
+        <option value="">All categories</option>
+      </select>
+      <select class="filter" id="status-filter">
+        <option value="">All services</option>
+        <option value="active">Active only</option>
+        <option value="inactive">Inactive only</option>
+      </select>
+    </div>
+
+    <div id="status-line">Loading professionals…</div>
+    <div id="pro-list"></div>
+    <div class="empty-state" id="empty-state" hidden>
+      <div class="emoji">🔍</div>
+      <h3>No professionals match that search</h3>
+      <p>Try a different name, phone number, or category.</p>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, collection, doc, getDoc, onSnapshot, updateDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+// Same web config used in main.dart — Firebase web config is not a secret,
+// access is controlled entirely by Firestore security rules + the
+// `admins` collection check below.
+const firebaseConfig = {
+  apiKey: "AIzaSyDTG2IXyV07uHaGcgX_Cn4T3xTRS_UJ6Xw",
+  authDomain: "korva-eb216.firebaseapp.com",
+  databaseURL: "https://korva-eb216-default-rtdb.firebaseio.com",
+  projectId: "korva-eb216",
+  storageBucket: "korva-eb216.firebasestorage.app",
+  messagingSenderId: "286011000805",
+  appId: "1:286011000805:web:488b263e91c07dd9db110c",
+  measurementId: "G-K8ZZP6XJ92"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const CATEGORY_EMOJI = {
+  plumbing: "🚰", electric: "⚡", cleaning: "🧹", carpentry: "🪚",
+  painting: "🪣", moving: "📦", ac: "❄️", mechanic: "🔩", other: "🛠️"
+};
+const emojiFor = (cat) => CATEGORY_EMOJI[(cat || "").toLowerCase()] || "🛠️";
+
+// ---------- DOM refs ----------
+const authScreen = document.getElementById('auth-screen');
+const appShell = document.getElementById('app');
+const authForm = document.getElementById('auth-form');
+const authEmail = document.getElementById('auth-email');
+const authPassword = document.getElementById('auth-password');
+const authSubmit = document.getElementById('auth-submit');
+const authError = document.getElementById('auth-error');
+const adminEmailEl = document.getElementById('admin-email');
+const signoutBtn = document.getElementById('signout-btn');
+const proList = document.getElementById('pro-list');
+const emptyState = document.getElementById('empty-state');
+const statusLine = document.getElementById('status-line');
+const searchInput = document.getElementById('search-input');
+const categoryFilter = document.getElementById('category-filter');
+const statusFilter = document.getElementById('status-filter');
+const toastEl = document.getElementById('toast');
+
+const statPros = document.getElementById('stat-pros');
+const statLive = document.getElementById('stat-live');
+const statServices = document.getElementById('stat-services');
+const statActive = document.getElementById('stat-active');
+
+// ---------- State ----------
+/** uid -> { profile, user, services: Map(serviceId -> data), servicesUnsub } */
+const prosData = new Map();
+let prosUnsub = null;
+let searchTerm = '';
+let categoryTerm = '';
+let statusTerm = '';
+
+function showToast(message, isError = false) {
+  toastEl.textContent = message;
+  toastEl.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => { toastEl.className = 'toast'; }, 2600);
+}
+
+// ---------- Auth ----------
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  authError.style.display = 'none';
+  authSubmit.disabled = true;
+  authSubmit.textContent = 'Signing in…';
+  try {
+    await signInWithEmailAndPassword(auth, authEmail.value.trim(), authPassword.value);
+  } catch (err) {
+    authError.textContent = friendlyAuthError(err);
+    authError.style.display = 'block';
+  } finally {
+    authSubmit.disabled = false;
+    authSubmit.textContent = 'Sign in';
+  }
+});
+
+signoutBtn.addEventListener('click', () => signOut(auth));
+
+function friendlyAuthError(err) {
+  const code = err?.code || '';
+  if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
+    return "Incorrect email or password.";
+  }
+  if (code.includes('too-many-requests')) {
+    return "Too many attempts. Please wait a moment and try again.";
+  }
+  return err?.message || "Could not sign in. Please try again.";
+}
+
+onAuthStateChanged(auth, async (user) => {
+  teardownListeners();
+
+  if (!user) {
+    appShell.hidden = true;
+    authScreen.hidden = false;
+    authPassword.value = '';
+    return;
+  }
+
+  // Gate access: the signed-in account must have a doc in /admins/{uid}.
+  try {
+    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+    if (!adminDoc.exists()) {
+      authError.textContent = "This account isn't set up as an admin. Ask a teammate to add you to the admins collection.";
+      authError.style.display = 'block';
+      await signOut(auth);
+      return;
+    }
+  } catch (err) {
+    authError.textContent = "Couldn't verify admin access: " + (err.message || err);
+    authError.style.display = 'block';
+    await signOut(auth);
+    return;
+  }
+
+  authScreen.hidden = true;
+  appShell.hidden = false;
+  adminEmailEl.textContent = user.email || '';
+  startDashboard();
+});
+
+function teardownListeners() {
+  if (prosUnsub) { prosUnsub(); prosUnsub = null; }
+  for (const entry of prosData.values()) {
+    if (entry.servicesUnsub) entry.servicesUnsub();
+  }
+  prosData.clear();
+}
+
+// ---------- Dashboard data ----------
+function startDashboard() {
+  statusLine.textContent = 'Loading professionals…';
+
+  prosUnsub = onSnapshot(collection(db, 'professionals'), async (snap) => {
+    for (const change of snap.docChanges()) {
+      const uid = change.doc.id;
+
+      if (change.type === 'removed') {
+        const entry = prosData.get(uid);
+        if (entry?.servicesUnsub) entry.servicesUnsub();
+        prosData.delete(uid);
+        render();
+        continue;
+      }
+
+      const profile = change.doc.data();
+      let entry = prosData.get(uid);
+
+      if (!entry) {
+        entry = { profile, user: null, services: new Map(), servicesUnsub: null };
+        prosData.set(uid, entry);
+
+        // Fetch user profile once (name/phone/email/photo).
+        getDoc(doc(db, 'users', uid)).then((userSnap) => {
+          entry.user = userSnap.exists() ? userSnap.data() : null;
+          render();
+        }).catch(() => { /* fine to show without profile info */ });
+
+        // Subscribe to this pro's services subcollection.
+        entry.servicesUnsub = onSnapshot(
+          collection(db, 'professionals', uid, 'services'),
+          (svcSnap) => {
+            entry.services.clear();
+            svcSnap.forEach((d) => entry.services.set(d.id, d.data()));
+            render();
+          },
+          (err) => showToast('Could not load services: ' + err.message, true)
+        );
+      } else {
+        entry.profile = profile;
+      }
+    }
+    render();
+  }, (err) => {
+    statusLine.textContent = 'Could not load professionals: ' + err.message;
+  });
+}
+
+// ---------- Toggle handler ----------
+async function toggleService(uid, serviceId, nextActive, btn) {
+  btn.disabled = true;
+  try {
+    await updateDoc(doc(db, 'professionals', uid, 'services', serviceId), {
+      isActive: nextActive,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (err) {
+    showToast('Could not update status: ' + (err.message || err), true);
+    btn.disabled = false;
+  }
+  // On success the onSnapshot listener re-renders with the new value.
+}
+
+// ---------- Rendering ----------
+function initials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase() || '?';
+}
+
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function rebuildCategoryOptions() {
+  const cats = new Set();
+  for (const entry of prosData.values()) {
+    for (const svc of entry.services.values()) {
+      if (svc.category) cats.add(svc.category);
+    }
+  }
+  const current = categoryFilter.value;
+  categoryFilter.innerHTML = '<option value="">All categories</option>' +
+    [...cats].sort().map(c => `<option value="${c}">${emojiFor(c)} ${c}</option>`).join('');
+  categoryFilter.value = [...cats].includes(current) ? current : '';
+}
+
+function matchesFilters(entry, uid) {
+  const name = (entry.user?.name || '').toLowerCase();
+  const phone = (entry.user?.phone || entry.user?.email || '').toLowerCase();
+  const term = searchTerm.toLowerCase();
+
+  const services = [...entry.services.entries()];
+
+  const nameMatches = !term || name.includes(term) || phone.includes(term) || uid.toLowerCase().includes(term);
+  const serviceTitleMatches = services.some(([, s]) => (s.title || '').toLowerCase().includes(term));
+  const passesSearch = !term || nameMatches || serviceTitleMatches;
+
+  if (!passesSearch) return { show: false, services };
+
+  let filteredServices = services;
+  if (categoryTerm) {
+    filteredServices = filteredServices.filter(([, s]) => s.category === categoryTerm);
+  }
+  if (statusTerm === 'active') {
+    filteredServices = filteredServices.filter(([, s]) => s.isActive !== false);
+  } else if (statusTerm === 'inactive') {
+    filteredServices = filteredServices.filter(([, s]) => s.isActive === false);
+  }
+
+  // If a category/status filter is active and this pro has no matching
+  // services, hide the card entirely.
+  if ((categoryTerm || statusTerm) && filteredServices.length === 0) {
+    return { show: false, services: filteredServices };
+  }
+
+  return { show: true, services: filteredServices };
+}
+
+function render() {
+  rebuildCategoryOptions();
+
+  const sorted = [...prosData.entries()].sort((a, b) => {
+    const an = a[1].user?.name || a[0];
+    const bn = b[1].user?.name || b[0];
+    return an.localeCompare(bn);
+  });
+
+  let totalServices = 0, activeServices = 0, liveCount = 0;
+  for (const [, entry] of sorted) {
+    totalServices += entry.services.size;
+    for (const svc of entry.services.values()) {
+      if (svc.isActive !== false) activeServices++;
+    }
+    if (entry.profile?.hasCompletedSetup) liveCount++;
+  }
+  statPros.textContent = prosData.size;
+  statLive.textContent = liveCount;
+  statServices.textContent = totalServices;
+  statActive.textContent = activeServices;
+
+  statusLine.textContent = prosData.size === 0
+    ? ''
+    : `Showing ${sorted.length} professional${sorted.length === 1 ? '' : 's'}`;
+
+  const cards = [];
+  let visibleCount = 0;
+
+  for (const [uid, entry] of sorted) {
+    const { show, services } = matchesFilters(entry, uid);
+    if (!show) continue;
+    visibleCount++;
+    cards.push(renderProCard(uid, entry, services));
+  }
+
+  proList.innerHTML = cards.join('');
+  emptyState.hidden = prosData.size === 0 || visibleCount > 0;
+
+  // Wire up toggle buttons.
+  proList.querySelectorAll('.toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const uid = btn.dataset.uid;
+      const sid = btn.dataset.sid;
+      const isActive = btn.classList.contains('active');
+      toggleService(uid, sid, !isActive, btn);
+    });
+  });
+}
+
+function renderProCard(uid, entry, services) {
+  const user = entry.user || {};
+  const profile = entry.profile || {};
+  const name = user.name || 'Unnamed professional';
+  const contact = user.phone || user.email || uid;
+  const rating = typeof profile.rating === 'number' ? profile.rating.toFixed(1) : null;
+  const reviewCount = profile.reviewCount || 0;
+
+  const setupPill = profile.hasCompletedSetup
+    ? `<span class="pill live">Setup complete</span>`
+    : `<span class="pill pending">Setup pending</span>`;
+  const onlinePill = profile.isOnline
+    ? `<span class="pill online">Online</span>`
+    : `<span class="pill offline">Offline</span>`;
+
+  const avatarInner = user.photoUrl
+    ? `<img src="${escapeHtml(user.photoUrl)}" alt="" />`
+    : initials(name);
+
+  const servicesHtml = services.length === 0
+    ? `<div class="no-services">No services${(categoryTerm || statusTerm) ? ' match the current filters' : ' added yet'}.</div>`
+    : services.map(([sid, svc]) => renderServiceRow(uid, sid, svc)).join('');
+
+  return `
+    <div class="pro-card">
+      <div class="pro-head">
+        <div class="avatar">${avatarInner}</div>
+        <div class="pro-info">
+          <div class="pro-name-row">
+            <span class="pro-name">${escapeHtml(name)}</span>
+            ${setupPill}
+            ${onlinePill}
+          </div>
+          <div class="pro-contact">${escapeHtml(contact)}</div>
+          <div class="pro-meta">${rating ? `★ ${rating} (${reviewCount} review${reviewCount === 1 ? '' : 's'})` : 'No reviews yet'} · ${services.length} service${services.length === 1 ? '' : 's'}</div>
+        </div>
+      </div>
+      <div class="services-block">
+        <div class="services-title">Services</div>
+        ${servicesHtml}
+      </div>
+    </div>
+  `;
+}
+
+function renderServiceRow(uid, sid, svc) {
+  const isActive = svc.isActive !== false; // treat missing field as active
+  return `
+    <div class="service-row">
+      <div class="service-emoji">${emojiFor(svc.category)}</div>
+      <div class="service-main">
+        <div class="service-title">${escapeHtml(svc.title || 'Untitled service')}</div>
+        <div class="service-sub" title="${escapeHtml(svc.description || '')}">${escapeHtml(svc.category || '')}${svc.description ? ' — ' + escapeHtml(svc.description) : ''}</div>
+      </div>
+      <div class="service-date">${formatDate(svc.createdAt)}</div>
+      <div class="toggle-wrap">
+        <span class="toggle-label ${isActive ? 'on' : 'off'}">${isActive ? 'Active' : 'Inactive'}</span>
+        <button class="toggle ${isActive ? 'active' : ''}" data-uid="${uid}" data-sid="${sid}" aria-pressed="${isActive}" title="Toggle service status"></button>
+      </div>
+    </div>
+  `;
+}
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+// ---------- Filters ----------
+let searchDebounce;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => {
+    searchTerm = searchInput.value.trim();
+    render();
+  }, 150);
+});
+categoryFilter.addEventListener('change', () => { categoryTerm = categoryFilter.value; render(); });
+statusFilter.addEventListener('change', () => { statusTerm = statusFilter.value; render(); });
+</script>
+</body>
+</html>
